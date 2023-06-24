@@ -10,7 +10,7 @@ The postgres data is persisted locally in a newly created directory called `data
 
 ## Images
 
-The images are available on [Docker Hub](https://hub.docker.com/u/xyzmaps) so therre is no need to build locally if you just want to run it.
+The images are available on [Docker Hub](https://hub.docker.com/u/xyzmaps) so no need to build locally if you just want to run it (arm64 for Apple silicon only at the moment, multiarch images are coming).
 
 ### Run using docker
 
