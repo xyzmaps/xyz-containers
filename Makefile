@@ -1,20 +1,23 @@
 .PHONY: build docker podman publish
 
 version := latest
-# arch := --platform linux/amd64,linux/arm64
+arch := linux/amd64,linux/arm64
 
 build: docker
 
-
+# build locally for docker
 docker:
-	docker build $(arch) ./xyz-hub -t xyzmaps/xyz-hub
-	docker build $(arch) ./xyz-postgres -t xyzmaps/xyz-postgres
+	docker build ./xyz-hub -t xyzmaps/xyz-hub
+	docker build ./xyz-postgres -t xyzmaps/xyz-postgres
 
+# publish multi-arch images to docker hub
 publish:
-	docker push xyzmaps/xyz-hub:$(version)
-	docker push xyzmaps/xyz-postgres:$(version)
+	docker buildx create --name xyzbuilder --use
+	docker buildx inspect --bootstrap
+	docker buildx build --platform $(arch) xyzmaps/xyz-hub:$(version) -t xyzmaps/xyz-hub --push
+	docker buildx build --platform $(arch) xyzmaps/xyz-postgres:$(version) -t xyzmaps/xyz-postgres --push
 
-
+# build locally for podman
 podman:
-	podman build $(arch) ./xyz-hub -t xyzmaps/xyz-hub
-	podman build $(arch) ./xyz-postgres -t xyzmaps/xyz-postgres
+	podman build ./xyz-hub -t xyzmaps/xyz-hub
+	podman build ./xyz-postgres -t xyzmaps/xyz-postgres
