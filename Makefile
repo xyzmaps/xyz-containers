@@ -16,6 +16,8 @@ publish:
 	docker buildx inspect --bootstrap
 	docker buildx build --platform $(arch) xyzmaps/xyz-hub:$(version) -t xyzmaps/xyz-hub --push
 	docker buildx build --platform $(arch) xyzmaps/xyz-postgres:$(version) -t xyzmaps/xyz-postgres --push
+	docker context use default
+
 
 # build locally for podman
 podman:
