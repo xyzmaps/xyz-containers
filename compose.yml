@@ -30,9 +30,16 @@ services:
     ports:
       - "6379:6379"
   swagger-ui:
-    image: "swaggerapi/swagger-ui"
-    container_name: "swagger-ui"
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
     ports:
       - "8888:8080"
     environment:
       - SWAGGER_JSON_URL=http://localhost:8080/hub/static/openapi/stable.yaml
+  redoc-ui:
+    image: redocly/redoc
+    container_name: redoc-ui
+    ports:
+      - "8889:80"
+    environment:
+      - SPEC_URL=http://localhost:8080/hub/static/openapi/stable.yaml

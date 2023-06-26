@@ -34,6 +34,8 @@ Once the stack is up, the following URLs should work:
 
 Swagger UI: http://localhost:8888/
 
+Redoc UI: http://localhost:8889/
+
 REST endpoint: http://localhost:8080/hub 
 
 ## Documentation (WIP)
