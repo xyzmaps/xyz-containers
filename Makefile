@@ -1,6 +1,5 @@
 .PHONY: build docker podman publish publish-init publish-build publish-cleanup
 
-version := latest
 arch := linux/amd64,linux/arm64
 
 build: docker
