@@ -8,6 +8,7 @@ build: docker
 docker:
 	docker build ./xyz-hub -t xyzmaps/xyz-hub
 	docker build ./xyz-postgres -t xyzmaps/xyz-postgres
+	docker build ./xyz-docs -t xyzmaps/xyz-docs
 
 # publish multi-arch images to docker hub
 publish: publish-init publish-build publish-cleanup
@@ -19,6 +20,7 @@ publish-init:
 publish-build:
 	docker buildx build --platform $(arch) ./xyz-hub -t xyzmaps/xyz-hub --push
 	docker buildx build --platform $(arch) ./xyz-postgres -t xyzmaps/xyz-postgres --push
+	docker buildx build --platform $(arch) ./xyz-docs -t xyzmaps/xyz-docs --push
 
 publish-cleanup:
 	docker context use default
@@ -30,3 +32,4 @@ publish-cleanup:
 podman:
 	podman build ./xyz-hub -t xyzmaps/xyz-hub
 	podman build ./xyz-postgres -t xyzmaps/xyz-postgres
+	podman build ./xyz-docs -t xyzmaps/xyz-docs
