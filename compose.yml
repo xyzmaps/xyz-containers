@@ -24,6 +24,11 @@ services:
       timeout: 5s
       retries: 2
       start_period: 20s
+  docs:
+    image: xyzmaps/xyz-docs
+    container_name: xyz-docs
+    ports:
+      - "80:9000"
   redis:
     image: redis
     container_name: redis
