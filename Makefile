@@ -6,9 +6,10 @@ build: docker
 
 # build locally for docker
 docker:
-	docker build ./xyz-hub -t xyzmaps/xyz-hub
-	docker build ./xyz-postgres -t xyzmaps/xyz-postgres
-	docker build ./xyz-docs -t xyzmaps/xyz-docs
+	docker build --no-cache ./xyz-hub -t xyzmaps/xyz-hub
+	docker build --no-cache ./xyz-postgres -t xyzmaps/xyz-postgres
+	docker build --no-cache ./xyz-docs -t xyzmaps/xyz-docs
+	docker build --no-cache ./xyz-corsproxy -t xyzmaps/xyz-corsproxy
 
 # publish multi-arch images to docker hub
 publish: publish-init publish-build publish-cleanup
@@ -18,9 +19,10 @@ publish-init:
 	docker buildx inspect --bootstrap
 	
 publish-build:
-	docker buildx build --platform $(arch) ./xyz-hub -t xyzmaps/xyz-hub --push
-	docker buildx build --platform $(arch) ./xyz-postgres -t xyzmaps/xyz-postgres --push
-	docker buildx build --platform $(arch) ./xyz-docs -t xyzmaps/xyz-docs --push
+# docker buildx build --platform $(arch) ./xyz-hub -t xyzmaps/xyz-hub --push
+# docker buildx build --platform $(arch) ./xyz-postgres -t xyzmaps/xyz-postgres --push
+# docker buildx build --platform $(arch) ./xyz-docs -t xyzmaps/xyz-docs --push
+	docker buildx build --platform $(arch) ./xyz-corsproxy -t xyzmaps/xyz-corsproxy --push
 
 publish-cleanup:
 	docker context use default
