@@ -29,11 +29,6 @@ services:
     container_name: xyz-docs
     ports:
       - "9000:80"
-  corsproxy:
-    image: xyzmaps/xyz-corsproxy
-    container_name: xyz-corsproxy
-    ports:
-      - "8181:8181"
   redis:
     image: redis
     container_name: redis

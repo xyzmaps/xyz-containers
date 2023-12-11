@@ -36,8 +36,6 @@ Documentation: http://localhost:9000/
 
 REST service: http://localhost:8080/hub
 
-REST service (CORS enabled): http://localhost:8181/hub
-
 Swagger UI: http://localhost:8888/
 
 Redoc UI: http://localhost:8889/
