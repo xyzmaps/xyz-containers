@@ -1,0 +1,8 @@
+{
+    "serverPort": 8080,
+    "jwtSecret": "xyz_secret_key",
+    "jwtIssuer": "xyz-hub",
+    "proxyPath": "/proxy",
+    "target": "http://xyz-hub:8080",
+    "allowPublicGet": true
+  }

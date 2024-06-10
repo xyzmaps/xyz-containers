@@ -1,0 +1,2 @@
+user    $2a$14$OgiS58sYfA7b.H0l/yOX7efNPlN/G6apDVwjmlNq0nOt3H33XOnEK
+admin   $2a$14$3RpbIllmVDGL.2sk3B2Dx.xkAwcWX0Ia3YzqnpUJDqEsMok5YnWnS

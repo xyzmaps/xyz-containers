@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2024-06-10T10:38:24Z"
+  labels:
+    app: xyz-pod
+  name: xyz-pod
+spec:
+  containers:
+  # postgres container
+  - args:
+    - postgres
+    image: docker.io/xyzmaps/xyz-postgres:latest
+    name: postgres
+    ports:
+    - containerPort: 5432
+      hostPort: 5432
+    securityContext:
+      runAsGroup: 0
+      runAsUser: 0
+    volumeMounts:
+    - name: xyz-data-pvc
+      mountPath: /var/lib/postgresql/data
+    resources:
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+
+  # redis container
+  - args:
+    - redis-server
+    image: docker.io/library/redis:latest
+    name: redis
+    volumeMounts:
+    - name: xyz-cache-pvc
+      mountPath: /data
+    resources:
+      limits:
+        cpu: "1"
+        memory: "1Gi"
+
+  # hub container
+  - image: docker.io/xyzmaps/xyz-hub:latest
+    name: xyz-hub
+    # ports:
+    # - containerPort: 8080
+    #   hostPort: 8080
+    resources:
+      limits:
+        cpu: "1"
+        memory: "1Gi"
+
+  # hub container
+  - image: docker.io/xyzmaps/xyz-gateway:latest
+    name: xyz-gateway
+    ports:
+    - containerPort: 8080
+      hostPort: 8080
+    resources:
+      limits:
+        cpu: "1"
+        memory: "1Gi"
+
+  # persistent volumes
+  volumes:
+  - name: xyz-data-pvc
+    persistentVolumeClaim:
+      claimName: xyz-data-pvc
+  - name: xyz-cache-pvc
+    persistentVolumeClaim:
+      claimName: xyz-cache-pvc
+
+
+  # # docs container
+  # - args:
+  #   - nginx
+  #   - -g
+  #   - daemon off;
+  #   image: docker.io/xyzmaps/xyz-docs:latest
+  #   name: xyz-docs
+  #   ports:
+  #   - containerPort: 80
+  #     hostPort: 9000
+  #   resources:
+  #     limits:
+  #       cpu: "1"
+  #       memory: "1Gi"
+
+  # # swagger-ui container
+  # - args:
+  #   - nginx
+  #   - -g
+  #   - daemon off;
+  #   env:
+  #   - name: SWAGGER_JSON_URL
+  #     value: http://localhost:8080/hub/static/openapi/stable.yaml
+  #   image: docker.io/swaggerapi/swagger-ui:latest
+  #   name: swagger-ui
+  #   ports:
+  #   - containerPort: 8080
+  #     hostPort: 8888
+  #   resources:
+  #     limits:
+  #       cpu: "1"
+  #       memory: "1Gi"
+
+  # # redoc-ui container
+  # - args:
+  #   - sh
+  #   - /usr/local/bin/docker-run.sh
+  #   env:
+  #   - name: SPEC_URL
+  #     value: http://localhost:8080/hub/static/openapi/stable.yaml
+  #   image: docker.io/redocly/redoc:latest
+  #   name: redoc-ui
+  #   ports:
+  #   - containerPort: 80
+  #     hostPort: 8889
+  #   resources:
+  #     limits:
+  #       cpu: "1"
+  #       memory: "1Gi"
