@@ -28,4 +28,4 @@ EXPOSE 8080
 
 USER nonroot:nonroot
 
-ENTRYPOINT ["/trantorHub","-config","/config.json","-users","/users.txt]
+CMD ["/trantorHub","-config","/config.json","-users","/users.txt"]

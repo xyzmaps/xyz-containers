@@ -1,50 +1,64 @@
-version: "3"
 services:
-  xyz-hub:
-    image: xyzmaps/xyz-hub
-    container_name: xyz-hub
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
   postgres:
     image: xyzmaps/xyz-postgres
     container_name: postgres
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     userns_mode: keep-id
     volumes:
-      - ./data:/var/lib/postgresql/data:z
+      - postgres-data:/var/lib/postgresql/data:z
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 2
       start_period: 20s
-  docs:
-    image: xyzmaps/xyz-docs
-    container_name: xyz-docs
-    ports:
-      - "9000:80"
   redis:
     image: redis
     container_name: redis
+    # ports:
+    #   - "6379:6379"
+  xyz-hub:
+    image: xyzmaps/xyz-hub
+    container_name: xyz-hub
+    # ports:
+    #   - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+  xyz-gateway:
+    image: xyzmaps/xyz-gateway
+    container_name: xyz-gateway
     ports:
-      - "6379:6379"
-  swagger-ui:
-    image: swaggerapi/swagger-ui
-    container_name: swagger-ui
-    ports:
-      - "8888:8080"
-    environment:
-      - SWAGGER_JSON_URL=http://localhost:8080/hub/static/openapi/stable.yaml
-  redoc-ui:
-    image: redocly/redoc
-    container_name: redoc-ui
-    ports:
-      - "8889:80"
-    environment:
-      - SPEC_URL=http://localhost:8080/hub/static/openapi/stable.yaml
+      - "8080:8080"
+    # depends_on:
+    #   xyz-hub:
+    #     condition: service_healthy
+
+
+# Optional services
+
+  # docs:
+  #   image: xyzmaps/xyz-docs
+  #   container_name: xyz-docs
+  #   ports:
+  #     - "9000:80"      
+  # swagger-ui:
+  #   image: swaggerapi/swagger-ui
+  #   container_name: swagger-ui
+  #   ports:
+  #     - "8888:8080"
+  #   environment:
+  #     - SWAGGER_JSON_URL=http://localhost:8080/hub/static/openapi/stable.yaml
+  # redoc-ui:
+  #   image: redocly/redoc
+  #   container_name: redoc-ui
+  #   ports:
+  #     - "8889:80"
+  #   environment:
+  #     - SPEC_URL=http://localhost:8080/hub/static/openapi/stable.yaml
+
+volumes:
+  postgres-data:
