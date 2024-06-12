@@ -1,20 +1,16 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  creationTimestamp: "2024-06-10T10:38:24Z"
   labels:
     app: xyz-pod
   name: xyz-pod
 spec:
   containers:
   # postgres container
-  - args:
-    - postgres
-    image: docker.io/xyzmaps/xyz-postgres:latest
-    name: postgres
+  - name: postgres
+    image: xyzmaps/xyz-postgres:latest
     ports:
     - containerPort: 5432
-      hostPort: 5432
     securityContext:
       runAsGroup: 0
       runAsUser: 0
@@ -27,10 +23,10 @@ spec:
         memory: "4Gi"
 
   # redis container
-  - args:
-    - redis-server
-    image: docker.io/library/redis:latest
-    name: redis
+  - name: redis
+    image: library/redis:latest
+    ports:
+    - containerPort: 6379
     volumeMounts:
     - name: xyz-cache-pvc
       mountPath: /data
@@ -40,19 +36,18 @@ spec:
         memory: "1Gi"
 
   # hub container
-  - image: docker.io/xyzmaps/xyz-hub:latest
-    name: xyz-hub
-    # ports:
-    # - containerPort: 8080
-    #   hostPort: 8080
+  - name: xyz-hub
+    image: xyzmaps/xyz-hub:latest
+    ports:
+    - containerPort: 8080
     resources:
       limits:
         cpu: "1"
         memory: "1Gi"
 
   # hub container
-  - image: docker.io/xyzmaps/xyz-gateway:latest
-    name: xyz-gateway
+  - name: xyz-gateway
+    image: xyzmaps/xyz-gateway:latest
     ports:
     - containerPort: 8080
       hostPort: 8080
@@ -76,7 +71,7 @@ spec:
   #   - nginx
   #   - -g
   #   - daemon off;
-  #   image: docker.io/xyzmaps/xyz-docs:latest
+  #   image: xyzmaps/xyz-docs:latest
   #   name: xyz-docs
   #   ports:
   #   - containerPort: 80
@@ -94,7 +89,7 @@ spec:
   #   env:
   #   - name: SWAGGER_JSON_URL
   #     value: http://localhost:8080/hub/static/openapi/stable.yaml
-  #   image: docker.io/swaggerapi/swagger-ui:latest
+  #   image: swaggerapi/swagger-ui:latest
   #   name: swagger-ui
   #   ports:
   #   - containerPort: 8080
@@ -111,7 +106,7 @@ spec:
   #   env:
   #   - name: SPEC_URL
   #     value: http://localhost:8080/hub/static/openapi/stable.yaml
-  #   image: docker.io/redocly/redoc:latest
+  #   image: redocly/redoc:latest
   #   name: redoc-ui
   #   ports:
   #   - containerPort: 80
