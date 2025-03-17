@@ -3,6 +3,8 @@
     "jwtSecret": "xyz_secret_key",
     "jwtIssuer": "xyz-hub",
     "proxyPath": "/hub",
-    "target": "http://xyz-hub:8080",
-    "allowPublicGet": true
+    "publicPath": "/hub/static",
+    "target": "http://xyz-hub:8080/hub",
+    "allowPublicGet": false,
+    "releaseMode": true
   }

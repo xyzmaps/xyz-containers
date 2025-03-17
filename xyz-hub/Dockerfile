@@ -1,4 +1,4 @@
-FROM maven:latest as builder
+FROM maven:latest AS builder
 
 RUN git clone https://github.com/xyzmaps/xyz-hub.git
 RUN cd xyz-hub && mvn clean install

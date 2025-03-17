@@ -1,5 +1,5 @@
 # Use a base image with git installed
-FROM alpine/git as clone-stage
+FROM alpine/git AS clone-stage
 
 WORKDIR /app
 

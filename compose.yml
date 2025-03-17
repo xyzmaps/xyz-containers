@@ -21,8 +21,8 @@ services:
   xyz-hub:
     image: xyzmaps/xyz-hub
     container_name: xyz-hub
-    # ports:
-    #   - "8080:8080"
+#    ports:
+#       - "8008:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,26 +39,25 @@ services:
 
 
 # Optional services
-
-  # docs:
-  #   image: xyzmaps/xyz-docs
-  #   container_name: xyz-docs
-  #   ports:
-  #     - "9000:80"      
-  # swagger-ui:
-  #   image: swaggerapi/swagger-ui
-  #   container_name: swagger-ui
-  #   ports:
-  #     - "8888:8080"
-  #   environment:
-  #     - SWAGGER_JSON_URL=http://localhost:8080/hub/static/openapi/stable.yaml
-  # redoc-ui:
-  #   image: redocly/redoc
-  #   container_name: redoc-ui
-  #   ports:
-  #     - "8889:80"
-  #   environment:
-  #     - SPEC_URL=http://localhost:8080/hub/static/openapi/stable.yaml
+  docs:
+    image: xyzmaps/xyz-docs
+    container_name: xyz-docs
+    ports:
+      - "9000:80"
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    ports:
+      - "8888:8080"
+    environment:
+      - SWAGGER_JSON_URL=http://localhost:8080/hub/static/openapi/stable.yaml
+  redoc-ui:
+    image: redocly/redoc
+    container_name: redoc-ui
+    ports:
+      - "8889:80"
+    environment:
+      - SPEC_URL=http://localhost:8080/hub/static/openapi/stable.yaml
 
 volumes:
   postgres-data:

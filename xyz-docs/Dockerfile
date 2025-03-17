@@ -1,4 +1,4 @@
-FROM docker.io/python:latest as builder
+FROM docker.io/python:latest AS builder
 
 RUN pip install mkdocs-material 
 RUN git clone https://github.com/xyzmaps/xyz-documentation.git
