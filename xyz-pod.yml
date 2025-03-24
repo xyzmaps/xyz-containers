@@ -1,117 +1,288 @@
-apiVersion: v1
-kind: Pod
+# postgres Deployment and Service
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  labels:
-    app: xyz-pod
-  name: xyz-pod
+  name: postgres
 spec:
-  containers:
-  # postgres container
-  - name: postgres
-    image: xyzmaps/xyz-postgres:latest
-    ports:
-    - containerPort: 5432
-    securityContext:
-      runAsGroup: 0
-      runAsUser: 0
-    volumeMounts:
-    - name: xyz-data-pvc
-      mountPath: /var/lib/postgresql/data
-    resources:
-      limits:
-        cpu: "2"
-        memory: "4Gi"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: xyzmaps/xyz-postgres
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            # The :z option isn't required in Kubernetes for volumes
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 2
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 
-  # redis container
-  - name: redis
-    image: library/redis:latest
-    ports:
-    - containerPort: 6379
-    volumeMounts:
-    - name: xyz-cache-pvc
-      mountPath: /data
-    resources:
-      limits:
-        cpu: "1"
-        memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
 
-  # hub container
-  - name: xyz-hub
-    image: xyzmaps/xyz-hub:latest
-    ports:
-    - containerPort: 8080
-    resources:
-      limits:
-        cpu: "1"
-        memory: "1Gi"
+# redis Deployment and Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis
+          ports:
+            - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
 
-  # hub container
-  - name: xyz-gateway
-    image: xyzmaps/xyz-gateway:latest
-    ports:
-    - containerPort: 8080
-      hostPort: 8080
-    resources:
-      limits:
-        cpu: "1"
-        memory: "1Gi"
+# xyz-hub Deployment and Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xyz-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xyz-hub
+  template:
+    metadata:
+      labels:
+        app: xyz-hub
+    spec:
+      containers:
+        - name: xyz-hub
+          image: xyzmaps/xyz-hub
+          ports:
+            - containerPort: 8080
+          env:
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: REDIS_HOST
+              value: redis
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
 
-  # persistent volumes
-  volumes:
-  - name: xyz-data-pvc
-    persistentVolumeClaim:
-      claimName: xyz-data-pvc
-  - name: xyz-cache-pvc
-    persistentVolumeClaim:
-      claimName: xyz-cache-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xyz-hub
+spec:
+  selector:
+    app: xyz-hub
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
 
+# xyz-gateway Deployment and Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xyz-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xyz-gateway
+  template:
+    metadata:
+      labels:
+        app: xyz-gateway
+    spec:
+      containers:
+        - name: xyz-gateway
+          image: xyzmaps/xyz-gateway
+          ports:
+            - containerPort: 8080
 
-  # # docs container
-  # - args:
-  #   - nginx
-  #   - -g
-  #   - daemon off;
-  #   image: xyzmaps/xyz-docs:latest
-  #   name: xyz-docs
-  #   ports:
-  #   - containerPort: 80
-  #     hostPort: 9000
-  #   resources:
-  #     limits:
-  #       cpu: "1"
-  #       memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xyz-gateway
+spec:
+  selector:
+    app: xyz-gateway
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
 
-  # # swagger-ui container
-  # - args:
-  #   - nginx
-  #   - -g
-  #   - daemon off;
-  #   env:
-  #   - name: SWAGGER_JSON_URL
-  #     value: http://localhost:8080/hub/static/openapi/stable.yaml
-  #   image: swaggerapi/swagger-ui:latest
-  #   name: swagger-ui
-  #   ports:
-  #   - containerPort: 8080
-  #     hostPort: 8888
-  #   resources:
-  #     limits:
-  #       cpu: "1"
-  #       memory: "1Gi"
+# Optional: docs Deployment and Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xyz-docs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xyz-docs
+  template:
+    metadata:
+      labels:
+        app: xyz-docs
+    spec:
+      containers:
+        - name: xyz-docs
+          image: xyzmaps/xyz-docs
+          ports:
+            - containerPort: 80
 
-  # # redoc-ui container
-  # - args:
-  #   - sh
-  #   - /usr/local/bin/docker-run.sh
-  #   env:
-  #   - name: SPEC_URL
-  #     value: http://localhost:8080/hub/static/openapi/stable.yaml
-  #   image: redocly/redoc:latest
-  #   name: redoc-ui
-  #   ports:
-  #   - containerPort: 80
-  #     hostPort: 8889
-  #   resources:
-  #     limits:
-  #       cpu: "1"
-  #       memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xyz-docs
+spec:
+  selector:
+    app: xyz-docs
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 80
+
+# Optional: swagger-ui Deployment and Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swagger-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swagger-ui
+  template:
+    metadata:
+      labels:
+        app: swagger-ui
+    spec:
+      containers:
+        - name: swagger-ui
+          image: swaggerapi/swagger-ui
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SWAGGER_JSON_URL
+              value: http://xyz-gateway:8080/hub/static/openapi/stable.yaml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: swagger-ui
+spec:
+  selector:
+    app: swagger-ui
+  ports:
+    - protocol: TCP
+      port: 8888
+      targetPort: 8080
+
+# Optional: redoc-ui Deployment and Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redoc-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redoc-ui
+  template:
+    metadata:
+      labels:
+        app: redoc-ui
+    spec:
+      containers:
+        - name: redoc-ui
+          image: redocly/redoc
+          ports:
+            - containerPort: 80
+          env:
+            - name: SPEC_URL
+              value: http://xyz-gateway:8080/hub/static/openapi/stable.yaml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redoc-ui
+spec:
+  selector:
+    app: redoc-ui
+  ports:
+    - protocol: TCP
+      port: 8889
+      targetPort: 80
