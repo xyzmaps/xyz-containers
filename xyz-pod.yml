@@ -13,7 +13,7 @@ spec:
         - mountPath: /var/lib/postgresql/data
           name: postgres-data
       securityContext:
-        runAsUser: 999  # Placeholder for "keep-id" equivalent
+        runAsUser: 999  # "keep-id" equivalent
       env:
         - name: POSTGRES_USER
           value: postgres  # Example for healthcheck
@@ -64,7 +64,16 @@ spec:
       ports:
         - containerPort: 8080
           hostPort: 8080
-
+# # mounting the users.txt from the host into the container
+#      volumeMounts:
+#        - mountPath: /users.txt
+#          subPath: users.txt
+#          name: xyz-gateway-file
+#  volumes:
+#    - name: xyz-gateway-file
+#      hostPath:
+#        path: ./xyz-gateway/users.txt
+#        type: File
 ---
 apiVersion: v1
 kind: Pod
